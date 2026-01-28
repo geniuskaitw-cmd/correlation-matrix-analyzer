@@ -4,13 +4,14 @@ import { DataConfig } from './components/DataConfig';
 import { CorrelationMatrix } from './components/CorrelationMatrix';
 import { ParsedData, VariableData, Matrix } from './types';
 import { generateCorrelationMatrix } from './utils/statistics';
-import { BarChart3, RefreshCw } from 'lucide-react';
+import { BarChart3, RefreshCw, Loader2 } from 'lucide-react';
 
 function App() {
   const [step, setStep] = useState<'upload' | 'config' | 'result'>('upload');
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [fileName, setFileName] = useState<string>("");
   const [matrix, setMatrix] = useState<Matrix | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const handleDataLoaded = (data: ParsedData, name: string) => {
     setParsedData(data);
@@ -19,10 +20,14 @@ function App() {
   };
 
   const handleAnalyze = (variables: VariableData[]) => {
-    // Perform calculation
-    const result = generateCorrelationMatrix(variables);
-    setMatrix(result);
-    setStep('result');
+    setIsAnalyzing(true);
+    // Use setTimeout to allow UI to update before heavy calculation
+    setTimeout(() => {
+      const result = generateCorrelationMatrix(variables);
+      setMatrix(result);
+      setIsAnalyzing(false);
+      setStep('result');
+    }, 50);
   };
 
   const handleReset = () => {
@@ -108,11 +113,23 @@ function App() {
           )}
 
           {step === 'config' && parsedData && (
-            <DataConfig 
-              rawData={parsedData} 
-              onAnalyze={handleAnalyze} 
-              onReset={handleReset}
-            />
+            <>
+              <DataConfig 
+                rawData={parsedData} 
+                onAnalyze={handleAnalyze} 
+                onReset={handleReset}
+                isAnalyzing={isAnalyzing}
+              />
+              {/* Loading Overlay */}
+              {isAnalyzing && (
+                <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-xl p-8 shadow-2xl flex flex-col items-center gap-4">
+                    <Loader2 className="w-12 h-12 text-blue-600 animate-spin" />
+                    <p className="text-slate-700 font-medium">正在計算相關係數...</p>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           {step === 'result' && matrix && (

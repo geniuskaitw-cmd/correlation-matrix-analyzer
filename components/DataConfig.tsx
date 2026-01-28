@@ -1,16 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ParsedData, VariableData } from '../types';
-import { ArrowRight, Settings2, Info, CheckSquare, Square, RotateCcw } from 'lucide-react';
+import { ArrowRight, Settings2, Info, CheckSquare, Square, Loader2 } from 'lucide-react';
 
 interface DataConfigProps {
   rawData: ParsedData;
   onAnalyze: (variables: VariableData[]) => void;
   onReset: () => void;
+  isAnalyzing?: boolean;
 }
 
 type DataOrientation = 'columns' | 'rows';
 
-export const DataConfig: React.FC<DataConfigProps> = ({ rawData, onAnalyze, onReset }) => {
+export const DataConfig: React.FC<DataConfigProps> = ({ rawData, onAnalyze, onReset, isAnalyzing = false }) => {
   const rows = rawData.rows;
   const [previewLimit] = useState(8);
 
@@ -274,9 +275,9 @@ export const DataConfig: React.FC<DataConfigProps> = ({ rawData, onAnalyze, onRe
         </div>
 
         {/* Data Preview Table */}
-        <div className="overflow-x-auto border rounded-lg border-slate-200">
+        <div className="overflow-auto border rounded-lg border-slate-200 max-h-[400px]" style={{ scrollbarWidth: 'auto', scrollbarColor: '#cbd5e1 #f1f5f9' }}>
           <table className="w-full text-sm text-left text-slate-600">
-            <thead className="text-xs text-slate-700 bg-slate-50 border-b border-slate-200">
+            <thead className="text-xs text-slate-700 bg-slate-50 border-b border-slate-200 sticky top-0 z-20">
               <tr>
                 {/* Row selector column (only for row orientation) */}
                 {orientation === 'rows' && (
@@ -397,17 +398,26 @@ export const DataConfig: React.FC<DataConfigProps> = ({ rawData, onAnalyze, onRe
 
           <button
             onClick={handleAnalyze}
-            disabled={selectedItems.size < 2}
+            disabled={selectedItems.size < 2 || isAnalyzing}
             className={`
               flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium transition-all
-              ${selectedItems.size >= 2
+              ${selectedItems.size >= 2 && !isAnalyzing
                 ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-md hover:shadow-lg'
                 : 'bg-slate-200 text-slate-400 cursor-not-allowed'
               }
             `}
           >
-            開始分析
-            <ArrowRight className="w-4 h-4" />
+            {isAnalyzing ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                分析中...
+              </>
+            ) : (
+              <>
+                開始分析
+                <ArrowRight className="w-4 h-4" />
+              </>
+            )}
           </button>
         </div>
       </div>
