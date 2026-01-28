@@ -1,0 +1,5 @@
+{
+  "name": "Correlation Matrix Analyzer",
+  "description": "Upload Excel/CSV files to calculate and visualize correlation coefficients between variables using an interactive heatmap.",
+  "requestFramePermissions": []
+}
